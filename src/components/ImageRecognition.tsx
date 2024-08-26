@@ -2,19 +2,24 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
 
 interface Prediction {
-    class: string;
-    score: number;
-    bbox: number[];
+    probability: number;
+    className: string;
+    bbox?: number[];
 
   }
   
-
 const ImageRecognition = () => {
   
-    // Configurar el backend al montar el componente
+    const [predictions, setPredictions] = useState<Prediction[]>([]);
+    const imageRef = useRef<HTMLImageElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [loading, setLoading] = useState(false);
+  
+  // Configurar el backend al montar el componente
     useEffect(() => {
       tf.setBackend('webgl').then(() => {
         console.log('Backend establecido en WebGL');
@@ -23,48 +28,33 @@ const ImageRecognition = () => {
       });
     }, []);
 
-    const [predictions, setPredictions] = useState<Prediction[]>([]);
-    const imageRef = useRef<HTMLImageElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [loading, setLoading] = useState(false);
-    
-
     const loadAndPredict = async () => {
       setLoading(true);
 
       // Cargar el modelo pre-entrenado MobileNet
       try{
         const model = await cocoSsd.load();
+        const modelmobile = await mobilenet.load();
         console.log('Modelo COCO SSD cargado');
         
         // Hacer predicciones
         if (imageRef.current) {
             const predict = await model.detect(imageRef.current);
-            setPredictions(predict)
-        }
-        // // Dibujar los resultados en el canvas
-        if(canvasRef.current){
-          const ctx = canvasRef.current.getContext('2d');
-          if(ctx && imageRef.current){
-            ctx.drawImage(imageRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-            // // Dibujar cajas alrededor de los objetos detectados
-            predictions.forEach((prediction) => {
-                ctx.strokeStyle = 'red';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(
-                  prediction.bbox[0],
-                  prediction.bbox[1],
-                  prediction.bbox[2],
-                  prediction.bbox[3]
-                );
-                ctx.fillStyle = 'red';
-                ctx.fillText(
-                  `${prediction.class} (${(prediction.score * 100).toFixed(2)}%)`,
-                  prediction.bbox[0],
-                  prediction.bbox[1] > 10 ? prediction.bbox[1] - 5 : 10
-                );
-            });
-          };
+            const predictions = await modelmobile.classify(imageRef.current);
+            const unifiedPredictions = [
+              ...predictions.map(p => ({
+                className: p.className,
+                probability: p.probability
+              })),
+              ...predict.map(p => ({
+                className: p.class,
+                probability: p.score,
+                bbox: p.bbox
+              }))
+            ]
+            // Ordenar por probabilidad de mayor a menor
+            const sortedPredictions = unifiedPredictions.sort((a, b) => b.probability - a.probability);
+            setPredictions(sortedPredictions)
         }
       }catch(error){
         console.log('Error al cargar el modelo o hacer la predicción:', error)
@@ -72,6 +62,46 @@ const ImageRecognition = () => {
         setLoading(false);
       }
         
+    }
+    
+    // Dibujar los resultados en el canvas
+    useEffect(()=>{
+      if(predictions.length > 0 && canvasRef.current && imageRef.current ){
+        const ctx = canvasRef.current.getContext("2d")
+        console.log(ctx)
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          ctx.drawImage(imageRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+  
+          predictions.forEach((prediction) => {
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 4;
+            if(prediction.bbox){
+              ctx.strokeRect(
+                prediction.bbox[0],
+                prediction.bbox[1],
+                prediction.bbox[2],
+                prediction.bbox[3]
+              );
+              ctx.fillStyle = 'red';
+              ctx.font = '18px Arial';
+              ctx.fillText(
+                `${prediction.className} (${(prediction.probability * 100).toFixed(4)}%)`,
+                prediction.bbox[0],
+                prediction.bbox[1] > 10 ? prediction.bbox[1] - 5 : 10
+              );
+            }
+          });
+        }
+      }
+    }, [predictions]);
+
+
+    const handeldivclick = () => {
+      const inputchangeimage = document.getElementById("choseFile") 
+      if(inputchangeimage){
+        inputchangeimage.click();
+      } 
     }
 
     return (
@@ -82,31 +112,39 @@ const ImageRecognition = () => {
           </div>
         }
         <h1>Detección de Objetos</h1>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                if (imageRef.current) {
-                  imageRef.current.src = event.target?.result as string;
+        <div className='flex mt-5 gap-10'>
+          <div className='w-[50%]'>
+            {predictions.length > 0 && (
+                <ul>
+                  {predictions.map((p, index) => (
+                    <li key={index}>{`${p.className}: ${(p.probability * 100).toFixed(2)}%`}</li>
+                  ))}
+                </ul>
+            )}
+          </div>
+          <div className='border-2 border-white cursor-pointer rounded-2xl' onClick={handeldivclick}>
+            <input
+              type="file"
+              id='choseFile'
+              accept="image/*"
+              className='hidden'
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    if (imageRef.current) {
+                      imageRef.current.src = event.target?.result as string;
+                    }
+                  };
+                  reader.readAsDataURL(file);
                 }
-              };
-              reader.readAsDataURL(file);
-            }
-          }}
-        />
-        <img ref={imageRef} alt="Subida" style={{ display: 'none' }} onLoad={loadAndPredict} />
-        <canvas ref={canvasRef} width="640" height="480" />
-        {predictions.length > 0 && (
-          <ul>
-            {predictions.map((p, index) => (
-              <li key={index}>{`${p.class}: ${(p.score * 100).toFixed(2)}%`}</li>
-            ))}
-          </ul>
-        )}
+              }}
+            />
+            <img ref={imageRef} alt="Subida" style={{ display: 'none' }} onLoad={loadAndPredict} />
+            <canvas ref={canvasRef} width="640" height="480" className='rounded-2xl'/>
+          </div>
+        </div>
       </div>
     );
 }
