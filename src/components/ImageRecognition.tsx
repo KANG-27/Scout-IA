@@ -105,15 +105,15 @@ const ImageRecognition = () => {
     }
 
     return (
-      <div>
+      <div className='h-[100%] flex justify-center'>
         {loading &&
           <div className="fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-opacity-50 bg-gray-900">
             <span className="text-white text-xl">Cargando...</span>
           </div>
         }
-        <h1>Detección de Objetos</h1>
         <div className='flex mt-5 gap-10'>
-          <div className='w-[50%]'>
+          <div className='w-[40%]'>
+            <p className='mb-5'>Posibles Objetos</p>
             {predictions.length > 0 && (
                 <ul>
                   {predictions.map((p, index) => (
@@ -123,6 +123,7 @@ const ImageRecognition = () => {
             )}
           </div>
           <div className='border-2 border-white cursor-pointer rounded-2xl' onClick={handeldivclick}>
+          <span className="material-icons">home</span>
             <input
               type="file"
               id='choseFile'
