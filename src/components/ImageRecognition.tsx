@@ -71,6 +71,7 @@ const ImageRecognition = () => {
         console.log(ctx)
         if (ctx) {
           ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          console.log(canvasRef.current.width, canvasRef.current.height)
           ctx.drawImage(imageRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
   
           predictions.forEach((prediction) => {
@@ -80,8 +81,8 @@ const ImageRecognition = () => {
               ctx.strokeRect(
                 prediction.bbox[0],
                 prediction.bbox[1],
-                prediction.bbox[2],
-                prediction.bbox[3]
+                prediction.bbox[2] > 700 ? 680: prediction.bbox[2],
+                prediction.bbox[3] + prediction.bbox[1] >= 700 ? 680-prediction.bbox[1]: prediction.bbox[3]
               );
               ctx.fillStyle = 'red';
               ctx.font = '18px Arial';
@@ -112,18 +113,8 @@ const ImageRecognition = () => {
           </div>
         }
         <div className='flex mt-5 gap-10 w-full'>
-          <div className='w-[40%]'>
-            <p className='mb-5'>Posibles Objetos</p>
-            {predictions.length > 0 && (
-                <ul>
-                  {predictions.map((p, index) => (
-                    <li key={index}>{`${p.className}: ${(p.probability * 100).toFixed(2)}%`}</li>
-                  ))}
-                </ul>
-            )}
-          </div>
           <div className='border-2 border-white cursor-pointer rounded-2xl flex justify-center items-center' onClick={handeldivclick}>
-          <span className="material-icons fixed z-10">+</span>
+            <span className="material-icons fixed z-10">+</span>
             <input
               type="file"
               id='choseFile'
@@ -143,7 +134,17 @@ const ImageRecognition = () => {
               }}
             />
             <img ref={imageRef} alt="Subida" style={{ display: 'none' }} onLoad={loadAndPredict} />
-            <canvas ref={canvasRef} width="1000" height="890" className='rounded-2xl brightness-50'/>
+            <canvas ref={canvasRef} width="700" height="700" className='rounded-2xl brightness-50'/>
+          </div>
+          <div className='w-[40%]'>
+            <p className='mb-5'>Posibles Objetos</p>
+            {predictions.length > 0 && (
+                <ul>
+                  {predictions.map((p, index) => (
+                    <li key={index}>{`${p.className}: ${(p.probability * 100).toFixed(2)}%`}</li>
+                  ))}
+                </ul>
+            )}
           </div>
         </div>
       </div>
