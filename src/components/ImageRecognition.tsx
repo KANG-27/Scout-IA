@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
+import Graphics from './Graphics';
 
 interface Prediction {
     probability: number;
@@ -137,14 +138,7 @@ const ImageRecognition = () => {
             <canvas ref={canvasRef} width="700" height="700" className='rounded-2xl brightness-50'/>
           </div>
           <div className='w-[40%]'>
-            <p className='mb-5'>Posibles Objetos</p>
-            {predictions.length > 0 && (
-                <ul>
-                  {predictions.map((p, index) => (
-                    <li key={index}>{`${p.className}: ${(p.probability * 100).toFixed(2)}%`}</li>
-                  ))}
-                </ul>
-            )}
+            <Graphics predictions={predictions}/>
           </div>
         </div>
       </div>
