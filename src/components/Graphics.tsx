@@ -1,5 +1,7 @@
-import  { FC, useEffect, useRef } from "react";
+import  { FC, useRef } from "react";
 import { Chart, registerables  } from "chart.js";
+import Image from 'next/image';
+
 interface GraphicsProps {
     predictions: Prediction[];
 }
@@ -7,8 +9,8 @@ interface Prediction {
     probability: number;
     className: string;
     bbox?: number[];
-
 }
+
 Chart.register(...registerables);
 const Graphics: FC<GraphicsProps> = ({predictions}) => {
     const chartRef = useRef<HTMLCanvasElement>(null);
@@ -43,10 +45,17 @@ const Graphics: FC<GraphicsProps> = ({predictions}) => {
         }
     }
     return(
-        <div>
-            {predictions.length > 0 && (
+        <div className="flex justify-center items-center h-full">
+            {predictions.length > 0 ?
                 <canvas ref={chartRef} width="400" height="400"></canvas>
-            )}
+            :
+            <Image
+                src="/img/Flecha.png"
+                alt="flecha"
+                width={500}
+                height={500}
+            />
+            }
         </div>
     )
 }
