@@ -81,16 +81,16 @@ const ImageRecognition = () => {
             if(prediction.bbox){
               ctx.strokeRect(
                 prediction.bbox[0],
-                prediction.bbox[1],
+                prediction.bbox[1] < 30 ? 30: prediction.bbox[1],
                 prediction.bbox[2] > 700 ? 680: prediction.bbox[2],
-                prediction.bbox[3] + prediction.bbox[1] >= 700 ? 680-prediction.bbox[1]: prediction.bbox[3]
+                (prediction.bbox[3] + prediction.bbox[1]) >= 700 ? prediction.bbox[1] < 30 ?  680 - 30:  680 - prediction.bbox[1]: prediction.bbox[3]
               );
               ctx.fillStyle = 'red';
               ctx.font = '18px Arial';
               ctx.fillText(
                 `${prediction.className} (${(prediction.probability * 100).toFixed(4)}%)`,
                 prediction.bbox[0],
-                prediction.bbox[1] > 10 ? prediction.bbox[1] - 5 : 10
+                prediction.bbox[1] < 30 ? 25: prediction.bbox[1]-4
               );
             }
           });
@@ -114,7 +114,7 @@ const ImageRecognition = () => {
           </div>
         }
         <div className='flex mt-5 gap-10 w-full'>
-          <div className='border-2 border-white cursor-pointer rounded-2xl flex justify-center items-center' onClick={handeldivclick}>
+          <div className='border-2 border-white cursor-pointer rounded-2xl flex justify-center items-center w-[703px] h-[703px]' onClick={handeldivclick}>
             <span className="material-icons fixed z-10">+</span>
             <input
               type="file"

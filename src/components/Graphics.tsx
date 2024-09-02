@@ -31,9 +31,9 @@ const Graphics: FC<GraphicsProps> = ({predictions}) => {
               data: {
                 labels: predictions.map(p => p.className),
                 datasets: [{
-                  label: 'Probabilidad',
+                  label: 'Probability',
                   data: predictions.map(p => p.probability * 100),
-                  backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                  backgroundColor: ['rgba(75, 192, 192, 2)', 'rgba(54, 162, 235, 2)', 'rgba(255, 99, 132, 2)','rgba(227, 134, 0, 2)'],
                   borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
                   borderWidth: 1
                 }]
@@ -48,8 +48,6 @@ const Graphics: FC<GraphicsProps> = ({predictions}) => {
             });
         }
     }
-
-
 
     return(
         <div>
