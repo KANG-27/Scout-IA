@@ -1,24 +1,18 @@
 import  { FC, useEffect, useRef } from "react";
 import { Chart, registerables  } from "chart.js";
-
 interface GraphicsProps {
     predictions: Prediction[];
 }
-
 interface Prediction {
     probability: number;
     className: string;
     bbox?: number[];
 
-  }
-
+}
 Chart.register(...registerables);
-
 const Graphics: FC<GraphicsProps> = ({predictions}) => {
-
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstanceRef = useRef<Chart | null>(null);
-
     if (chartRef.current) {
         const ctx = chartRef.current.getContext('2d');
         // Verificar si existe un gráfico previo y destruirlo
@@ -48,7 +42,6 @@ const Graphics: FC<GraphicsProps> = ({predictions}) => {
             });
         }
     }
-
     return(
         <div>
             {predictions.length > 0 && (

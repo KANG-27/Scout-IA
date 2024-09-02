@@ -5,21 +5,17 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
 import Graphics from './Graphics';
-
 interface Prediction {
     probability: number;
     className: string;
     bbox?: number[];
 
   }
-  
 const ImageRecognition = () => {
-  
-    const [predictions, setPredictions] = useState<Prediction[]>([]);
-    const imageRef = useRef<HTMLImageElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [loading, setLoading] = useState(false);
-  
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loading, setLoading] = useState(false);
   // Configurar el backend al montar el componente
     useEffect(() => {
       tf.setBackend('webgl').then(() => {
@@ -31,13 +27,10 @@ const ImageRecognition = () => {
 
     const loadAndPredict = async () => {
       setLoading(true);
-
       // Cargar el modelo pre-entrenado MobileNet
       try{
         const model = await cocoSsd.load();
         const modelmobile = await mobilenet.load();
-        console.log('Modelo COCO SSD cargado');
-        
         // Hacer predicciones
         if (imageRef.current) {
             const predict = await model.detect(imageRef.current);
@@ -64,7 +57,6 @@ const ImageRecognition = () => {
       }
         
     }
-    
     // Dibujar los resultados en el canvas
     useEffect(()=>{
       if(predictions.length > 0 && canvasRef.current && imageRef.current ){
@@ -97,15 +89,12 @@ const ImageRecognition = () => {
         }
       }
     }, [predictions]);
-
-
     const handeldivclick = () => {
       const inputchangeimage = document.getElementById("choseFile") 
       if(inputchangeimage){
         inputchangeimage.click();
       } 
     }
-
     return (
       <div className='h-[100%] flex justify-center ml-52 mr-20'>
         {loading &&
