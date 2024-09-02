@@ -24,12 +24,12 @@ Visualización: Representa los resultados en gráficos interactivos para una mej
 
 1. Clona el repositorio:
    ```bash
-   git clone https://github.com/tu_usuario/tu_proyecto.git
+   git clone https://github.com/KANG-27/Scout-IA.git
    ```
 
 2. Navega a la carpeta del proyecto:
    ```bash
-   cd tu_proyecto
+   cd Scout-IA.git
    ```
 
 3. Instala las dependencias:
